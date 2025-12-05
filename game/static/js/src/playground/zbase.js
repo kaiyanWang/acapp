@@ -3,11 +3,19 @@ class AcGamePlayground {
         this.root = root;
         this.$playground = $(`
 <div class="ac-game-playground">
-游戏界面
 </div>
         `);
-        this.hide();
-        this.root.$ac_game.append(this.$playground);
+        // this.hide();
+        this.root.$ac_game.append(this.$playground);  // 将$playground加入$ac_game
+        this.width = this.$playground.width();
+        this.height = this.$playground.height();
+        this.game_map = new GameMap(this);
+        this.players = [];
+        this.players.push(new Player(this, this.width / 2, this.height / 2, this.height * 0.05, "red", this.height * 0.15, true));
+
+        for (let i = 0; i < 5; i ++) {
+            this.players.push(new Player(this, this.width / 2, this.height / 2, this.height * 0.05, "blue", this.height * 0.15, false));
+        }
 
         this.start();
     }
