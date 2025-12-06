@@ -1,5 +1,5 @@
 class FireBall extends AcGameObject {
-    constructor(playground, player, x, y, radius, vx, vy, color, speed, move_length) {
+    constructor(playground, player, x, y, radius, vx, vy, color, speed, move_length, damage) {
         super();
         this.playground = playground;
         this.ctx = this.playground.game_map.ctx;
@@ -12,11 +12,30 @@ class FireBall extends AcGameObject {
         this.color = color;
         this.speed = speed;
         this.move_length = move_length;
+        this.damage = damage;
         this.eps = 0.1;
     }
 
     start() {
 
+    }
+
+    get_dist(x1, y1, x2, y2) {  // 求距离
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    is_collision(player) {  // 碰撞检测
+        let distance = this.get_dist(this.x, this.y, player.x, player.y);
+        if (player.radius + this.radius >= distance) return true;
+        return false;
+    }
+
+    attack(player) {  // 攻击
+        let angle = Math.atan2(player.y - this.y, player.x - this.x);
+        player.is_attacked(angle, this.damage);
+        this.destroy();
     }
 
     update() {
@@ -30,6 +49,12 @@ class FireBall extends AcGameObject {
         this.y += this.vy * moved;
         this.move_length -= moved;
 
+        for (let i= 0; i < this.playground.players.length; i++) {
+            let player = this.playground.players[i];
+            if (this.player !== player && this.is_collision(player)) {
+                this.attack(player);
+            }
+        }
 
         this.render();
     }
