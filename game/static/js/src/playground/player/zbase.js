@@ -81,8 +81,19 @@ class Player extends AcGameObject {
     }
 
     is_attacked(angle, damage) {  // 玩家被击中
+
+        for (let i = 0; i < 20 + Math.random() * 20; i ++) {  // 实现粒子攻击效果
+            let x = this.x, y = this.y;
+            let radius = this.radius * Math.random() * 0.1;
+            let angle = Math.PI * 2 * Math.random();
+            let vx = Math.cos(angle), vy = Math.sin(angle);
+            let color = this.color;
+            let speed = this.speed * 10;
+            let move_length = this.radius * Math.random() * 5;
+            new Particle(this.playground, x, y, radius, vx, vy, color, speed, move_length);
+        }
+
         this.radius -= damage;
-        console.log(this.radius);
         if (this.radius < 10) {  // 血量值为半径，半径小于10px认为死亡
             this.destroy();
             return false;
@@ -90,6 +101,7 @@ class Player extends AcGameObject {
         this.damage_x = Math.cos(angle);
         this.damage_y = Math.sin(angle);
         this.damage_speed = damage * 100;
+        this.speed *= 0.8;
     }
 
     update(){
