@@ -17,6 +17,7 @@ class Player extends AcGameObject {
         this.is_me = is_me;
         this.eps = 0.1;
         this.friction = 0.9;
+        this.spent_time = 0;
 
         this.cur_skill = null;
     }
@@ -105,6 +106,11 @@ class Player extends AcGameObject {
     }
 
     update(){
+        this.spent_time += this.timedelta / 1000;
+        if (this.spent_time > 4 && Math.random() < 1 / 300.0) {  // ai球每5s释放炮弹,前5秒不射
+            let player = this.playground.players[0];  // 单人模式下，ai朝玩家射，players[0]是玩家
+            this.shoot_fireball(player.x, player.y);
+        }
         if (this.damage_speed > 10) {
             this.vx = this.vy = 0;
             this.move_length = 0;
@@ -115,7 +121,7 @@ class Player extends AcGameObject {
             if (this.move_length < this.eps) {
                 this.move_length = 0;
                 this.vx = this.vy = 0;
-                if (!this.is_me) {
+                if (!this.is_me) {  // ai随机移动
                     let tx = Math.random() * this.playground.width;
                     let ty = Math.random() * this.playground.height;
                     this.move_to(tx, ty);
