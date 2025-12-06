@@ -286,7 +286,7 @@ class Player extends AcGameObject {
     update(){
         this.spent_time += this.timedelta / 1000;
         if (this.spent_time > 4 && Math.random() < 1 / 300.0) {  // ai球每5s释放炮弹,前5秒不射
-            let player = this.playground.players[0];  // 单人模式下，ai朝玩家射，players[0]是玩家
+            let player = this.playground.players[Math.floor(Math.random() * this.playground.players.length)];  // 单人模式下，ai朝玩家射，players[0]是玩家
             this.shoot_fireball(player.x, player.y);
         }
         if (this.damage_speed > 10) {
