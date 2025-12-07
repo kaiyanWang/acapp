@@ -20,6 +20,12 @@ class Player extends AcGameObject {
         this.spent_time = 0;
 
         this.cur_skill = null;
+
+        // 画头像
+        if (this.is_me) {
+            this.img = new Image();
+            this.img.src = this.playground.root.settings.photo;
+        }
     }
 
     start(){
@@ -38,11 +44,13 @@ class Player extends AcGameObject {
             return false;
         });
         this.playground.game_map.$canvas.mousedown(function (e) {
+            const rect = outer.ctx.canvas.getBoundingClientRect();  // 画布左上角相对于浏览器（0,0）的位置
+            let tx = e.clientX - rect.left, ty = e.clientY - rect.top;
             if(e.which === 3){  // 鼠标右键为3
-                outer.move_to(e.clientX, e.clientY);
+                outer.move_to(tx, ty);
             } else if(e.which === 1) {  // 鼠标左键为1
                 if (outer.cur_skill === "fireball") {
-                    outer.shoot_fireball(e.clientX, e.clientY);
+                    outer.shoot_fireball(tx, ty);
                 }
 
                 outer.cur_skill = null;
@@ -107,8 +115,10 @@ class Player extends AcGameObject {
 
     update(){
         this.spent_time += this.timedelta / 1000;
-        if (this.spent_time > 4 && Math.random() < 1 / 300.0) {  // ai球每5s释放炮弹,前5秒不射
-            let player = this.playground.players[Math.floor(Math.random() * this.playground.players.length)];  // 单人模式下，ai朝玩家射，players[0]是玩家
+        if (!this.is_me && this.spent_time > 4 && Math.random() < 1 / 300.0) {  // ai球每5s释放炮弹,前4秒不射
+            let player = this.playground.players[Math.floor(Math.random() * this.playground.players.length)];  // 单人模式下，ai朝其他ai和玩家射
+            let tx = player.x + player.vx * player.speed * this.timedelta / 1000;
+            let ty = player.y + player.vy * player.speed * this.timedelta / 1000;  // AI预判
             this.shoot_fireball(player.x, player.y);
         }
         if (this.damage_speed > 10) {
@@ -139,9 +149,27 @@ class Player extends AcGameObject {
     }
 
     render(){
-        this.ctx.beginPath();
-        this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI *2, false);
-        this.ctx.fillStyle = this.color;
-        this.ctx.fill();
+        if (this.is_me) {  // 画头像
+            this.ctx.save();
+            this.ctx.beginPath();
+            this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+            this.ctx.stroke();
+            this.ctx.clip();
+            this.ctx.drawImage(this.img, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+            this.ctx.restore();
+        } else {  // 敌人纯色
+            this.ctx.beginPath();
+            this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI *2, false);
+            this.ctx.fillStyle = this.color;
+            this.ctx.fill();
+        }
+    }
+
+    on_destroy() {  // 玩家死亡后pop掉
+        for (let i = 0; i < this.playground.players.length; i ++) {
+            if (this.playground.players[i] === this) {
+                this.playground.players.splice(i, 1);
+            }
+        }
     }
 }
