@@ -25,6 +25,12 @@ class Settings {
                 <button>登录</button>
             </div>
         </div>
+        <div class="ac-game-settings-error-message">
+            用户名或密码错误
+        </div>
+        <div class="ac-game-settings-option">
+            注册
+        </div>
     </div>
     <div class="ac-game-settings-register">
         <div class="ac-game-settings-title">注册</div>
