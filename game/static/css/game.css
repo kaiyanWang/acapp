@@ -7,13 +7,13 @@
 }
 
 .ac-game-settings-login {
-    height: 41vh;
+    height: 44vh;
     width: 20vw;
     position: relative;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(50, 60, 80, 0.7);
     border-radius: 5px;
 }
 
@@ -28,6 +28,11 @@
 }
 
 .ac-game-settings-submit {
+    display: block;
+    height: 7vh;
+}
+
+.ac-game-settings-github {
     display: block;
     height: 7vh;
 }
@@ -82,16 +87,33 @@
     height: 7vh;
     padding-top: 2vh;
     margin-bottom: 2vh;
-
 }
+
+.ac-game-settings-github > img {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+}
+
+.ac-game-settings-github > div {
+    font-size: 1.5vh;
+    color: white;
+    text-align: center;
+    display: block;
+    padding-top: 1.5vh;
+}
+
+
 .ac-game-settings-register {
-    height: 49vh;
+    height: 52vh;
     width: 20vw;
     position: relative;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(50, 60, 80, 0.7);
     border-radius: 5px;
 }
 
