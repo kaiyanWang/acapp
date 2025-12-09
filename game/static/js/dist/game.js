@@ -562,6 +562,8 @@ class Settings {
 
         this.$register.hide();
 
+        this.$github_login = this.$settings.find('.ac-game-settings-github img');
+
         this.root.$ac_game.append(this.$settings);
 
         this.start();
@@ -607,8 +609,13 @@ class Settings {
     }
 
     add_listening_events () {  // 监听函数
+        let outer = this;
         this.add_listening_events_login();
         this.add_listening_events_register();
+        
+        this.$github_login.click(function() {
+            outer.github_login();
+        })
     }
 
     add_listening_events_login() {
@@ -629,6 +636,22 @@ class Settings {
         });
         this.$register_submit.click(function() {
             outer.register_on_remote();
+        });
+    }
+
+    github_login() {  // github一键登录
+        $.ajax({
+            url: "http://39.99.43.230:8000/settings/github/apply_code/",
+            type: "get",
+            data: {
+            },
+            success(resp) {
+                console.log(resp);
+                if (resp.result === "success") {
+                    console.log(resp);
+                    window.location.replace(resp.apply_code_url);
+                }
+            }
         });
     }
 
