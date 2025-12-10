@@ -127,6 +127,13 @@ class GameMap extends AcGameObject {
         
     }
 
+    resize() {  // 动态修改长宽
+        this.ctx.canvas.width = this.playground.width;
+        this.ctx.canvas.height = this.playground.height;
+        this.ctx.canvas.width = this.playground.width;
+        this.ctx.canvas.height = this.playground.height;
+    }
+
     update() {
         this.render();
     }
@@ -150,7 +157,7 @@ class Particle extends AcGameObject {
         this.speed = speed;
         this.move_length = move_length;
         this.friction = 0.9;
-        this.eps = 1;
+        this.eps = 0.01;
     }
 
     start() {
@@ -171,8 +178,9 @@ class Particle extends AcGameObject {
     }
 
     render() {
+        let scale = this.playground.scale;
         this.ctx.beginPath();
-        this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI * 2, false);
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
     }
@@ -195,7 +203,7 @@ class Player extends AcGameObject {
         this.color = color;
         this.speed = speed;
         this.is_me = is_me;
-        this.eps = 0.1;
+        this.eps = 0.01;
         this.friction = 0.9;
         this.spent_time = 0;
 
@@ -212,8 +220,8 @@ class Player extends AcGameObject {
         if(this.is_me){
             this.add_listening_events();
         } else {
-            let tx = Math.random() * this.playground.width;
-            let ty = Math.random() * this.playground.height;
+            let tx = Math.random() * this.playground.width / this.playground.scale;
+            let ty = Math.random() * this.playground.height / this.playground.scale;
             this.move_to(tx, ty);
         }
     }
@@ -225,7 +233,7 @@ class Player extends AcGameObject {
         });
         this.playground.game_map.$canvas.mousedown(function (e) {
             const rect = outer.ctx.canvas.getBoundingClientRect();  // 画布左上角相对于浏览器（0,0）的位置
-            let tx = e.clientX - rect.left, ty = e.clientY - rect.top;
+            let tx = (e.clientX - rect.left) / outer.playground.scale, ty = (e.clientY - rect.top) / outer.playground.scale;
             if(e.which === 3){  // 鼠标右键为3
                 outer.move_to(tx, ty);
             } else if(e.which === 1) {  // 鼠标左键为1
@@ -247,13 +255,13 @@ class Player extends AcGameObject {
 
     shoot_fireball(tx, ty) {
         let x = this.x, y = this.y;
-        let radius = this.playground.height * 0.01;
+        let radius = 0.01;
         let angle = Math.atan2(ty - this.y, tx - this.x);
         let vx = Math.cos(angle), vy = Math.sin(angle);
         let color = "orange";
-        let speed = this.playground.height * 0.5;
-        let move_length = this.playground.height * 1;
-        new FireBall(this.playground, this, x, y, radius, vx, vy, color, speed, move_length, this.playground.height * 0.01);
+        let speed = 0.5;
+        let move_length = 1;
+        new FireBall(this.playground, this, x, y, radius, vx, vy, color, speed, move_length, 0.01);
     }
 
     get_dist(x1, y1, x2,y2) {
@@ -283,7 +291,7 @@ class Player extends AcGameObject {
         }
 
         this.radius -= damage;
-        if (this.radius < 10) {  // 血量值为半径，半径小于10px认为死亡
+        if (this.radius < this.eps) {  // 血量值为半径，半径小于0.01*height认为死亡
             this.destroy();
             return false;
         }
@@ -294,14 +302,19 @@ class Player extends AcGameObject {
     }
 
     update(){
-        this.spent_time += this.timedelta / 1000;
+        this.update_move();
+        this.render();
+    }
+
+    update_move() {  // 更新移动
+       this.spent_time += this.timedelta / 1000;
         if (!this.is_me && this.spent_time > 4 && Math.random() < 1 / 300.0) {  // ai球每5s释放炮弹,前4秒不射
             let player = this.playground.players[Math.floor(Math.random() * this.playground.players.length)];  // 单人模式下，ai朝其他ai和玩家射
             let tx = player.x + player.vx * player.speed * this.timedelta / 1000;
             let ty = player.y + player.vy * player.speed * this.timedelta / 1000;  // AI预判
             this.shoot_fireball(player.x, player.y);
         }
-        if (this.damage_speed > 10) {
+        if (this.damage_speed > this.eps) {
             this.vx = this.vy = 0;
             this.move_length = 0;
             this.x += this.damage_x * this.damage_speed * this.timedelta / 1000;
@@ -312,8 +325,8 @@ class Player extends AcGameObject {
                 this.move_length = 0;
                 this.vx = this.vy = 0;
                 if (!this.is_me) {  // ai随机移动
-                    let tx = Math.random() * this.playground.width;
-                    let ty = Math.random() * this.playground.height;
+                    let tx = Math.random() * this.playground.width / this.playground.scale;
+                    let ty = Math.random() * this.playground.height / this.playground.scale;
                     this.move_to(tx, ty);
                 }
             } else {
@@ -325,21 +338,21 @@ class Player extends AcGameObject {
 
             }
         }
-        this.render();
     }
 
     render(){
+        let scale = this.playground.scale;  // 渲染时需要用绝对大小，需要乘上scale
         if (this.is_me) {  // 画头像
             this.ctx.save();
             this.ctx.beginPath();
-            this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+            this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI * 2, false);
             this.ctx.stroke();
             this.ctx.clip();
-            this.ctx.drawImage(this.img, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+            this.ctx.drawImage(this.img, (this.x - this.radius) * scale, (this.y - this.radius) * scale, this.radius * 2 * scale, this.radius * 2 * scale);
             this.ctx.restore();
         } else {  // 敌人纯色
             this.ctx.beginPath();
-            this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI *2, false);
+            this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI *2, false);
             this.ctx.fillStyle = this.color;
             this.ctx.fill();
         }
@@ -368,7 +381,7 @@ class FireBall extends AcGameObject {
         this.speed = speed;
         this.move_length = move_length;
         this.damage = damage;
-        this.eps = 0.1;
+        this.eps = 0.01;
     }
 
     start() {
@@ -415,8 +428,9 @@ class FireBall extends AcGameObject {
     }
 
     render() {
+        let scale = this.playground.scale;
         this.ctx.beginPath();
-        this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI * 2, false);
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
     }
@@ -429,7 +443,7 @@ class AcGamePlayground {
 </div>
         `);
         this.hide();
-       
+        this.root.$ac_game.append(this.$playground);  // 将$playground加入$ac_game
         this.start();
     }
 
@@ -439,6 +453,22 @@ class AcGamePlayground {
     }
 
     start() {
+        let outer = this;
+        // 用户改变窗口大小时，触发this.resize()
+        $(window).resize(function() {
+            outer.resize();
+        });
+    }
+
+    resize() {
+        this.width = this.$playground.width();
+        this.height = this.$playground.height();
+        let unit = Math.min(this.width / 16, this.height / 9);
+        this.width = unit * 16;
+        this.height = unit * 9;
+        this.scale = this.height;
+
+        if (this.game_map) this.game_map.resize();
     }
 
     update() {
@@ -447,15 +477,16 @@ class AcGamePlayground {
     show() {  // 打开playground界面
         this.$playground.show();
 
-        this.root.$ac_game.append(this.$playground);  // 将$playground加入$ac_game
+        this.resize();
+
         this.width = this.$playground.width();
         this.height = this.$playground.height();
         this.game_map = new GameMap(this);
         this.players = [];
-        this.players.push(new Player(this, this.width / 2, this.height / 2, this.height * 0.05, "white", this.height * 0.15, true));
+        this.players.push(new Player(this, this.width / 2 / this.scale, 0.5, 0.05, "white", 0.15, true));
 
         for (let i = 0; i < 5; i ++) {
-            this.players.push(new Player(this, this.width / 2, this.height / 2, this.height * 0.05, this.get_random_color(), this.height * 0.15, false));
+            this.players.push(new Player(this, this.width / 2 / this.scale, 0.5, 0.05, this.get_random_color(), 0.15, false));
         }
 
     }
@@ -491,18 +522,23 @@ class Settings {
                 <button>登录</button>
             </div>
         </div>
-        <div class="ac-game-settings-error-message">
-        </div>
+        <div class="ac-game-settings-error-message"></div>
         <div class="ac-game-settings-option">
             注册
         </div>
         <br>
-        <div class="ac-game-settings-github">
-             <img width="30" src="http://39.99.43.230:8000/static/image/settings/github_logo.png">
-             <div>github一键登录</div>
-        </div>
-    </div>
 
+		<div class="ac-game-settings-third-party">
+			<div class="ac-game-settings-github">
+				<img width="30" src="http://39.99.43.230:8000/static/image/settings/github_logo.png">
+				<div>github一键登录</div>
+			</div>
+			<div class="ac-game-settings-wechat">
+				<img width="30" src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/svg/logo-wechat.svg">
+				<div>微信一键登录</div>
+			</div>
+		</div>
+</div>
 
     <div class="ac-game-settings-register">
         <div class="ac-game-settings-title">注册</div>
@@ -526,21 +562,23 @@ class Settings {
                 <button>注册</button>
             </div>
         </div>
-        <div class="ac-game-settings-error-message">
-        </div>
+        <div class="ac-game-settings-error-message"></div>
         <div class="ac-game-settings-option">
             登录
         </div>
         <br>
-        <div class="ac-game-settings-github">
-             <img width="30" src="http://39.99.43.230:8000/static/image/settings/github_logo.png">
-             <div>github一键登录</div>
+        <div class="ac-game-settings-third-party">
+            <div class="ac-game-settings-github">
+                <img width="30" src="http://39.99.43.230:8000/static/image/settings/github_logo.png">
+                <div>github一键登录</div>
+            </div>
+            <div class="ac-game-settings-wechat">
+                <img width="30" src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/svg/logo-wechat.svg">
+                <div>微信一键登录</div>
+            </div>
         </div>
+
     </div>
-
-
- 
-</div>
             `);
 
         this.$login = this.$settings.find(".ac-game-settings-login");
@@ -563,6 +601,7 @@ class Settings {
         this.$register.hide();
 
         this.$github_login = this.$settings.find('.ac-game-settings-github img');
+		this.$wechat_login = this.$settings.find('.ac-game-settings-wechat img');
 
         this.root.$ac_game.append(this.$settings);
 
@@ -615,7 +654,10 @@ class Settings {
         
         this.$github_login.click(function() {
             outer.github_login();
-        })
+        });
+        this.$wechat_login.click(function() {
+            outer.wechat_login();
+        });
     }
 
     add_listening_events_login() {
@@ -646,11 +688,18 @@ class Settings {
             data: {
             },
             success(resp) {
-                console.log(resp);
                 if (resp.result === "success") {
-                    console.log(resp);
                     window.location.replace(resp.apply_code_url);
                 }
+            }
+        });
+    }
+
+    wechat_login() {
+        $.ajax({
+            url: "",
+            type: "get",
+            success(resp) {
             }
         });
     }

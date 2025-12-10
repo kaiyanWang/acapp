@@ -15,7 +15,7 @@ class Player extends AcGameObject {
         this.color = color;
         this.speed = speed;
         this.is_me = is_me;
-        this.eps = 0.1;
+        this.eps = 0.01;
         this.friction = 0.9;
         this.spent_time = 0;
 
@@ -32,8 +32,8 @@ class Player extends AcGameObject {
         if(this.is_me){
             this.add_listening_events();
         } else {
-            let tx = Math.random() * this.playground.width;
-            let ty = Math.random() * this.playground.height;
+            let tx = Math.random() * this.playground.width / this.playground.scale;
+            let ty = Math.random() * this.playground.height / this.playground.scale;
             this.move_to(tx, ty);
         }
     }
@@ -45,7 +45,7 @@ class Player extends AcGameObject {
         });
         this.playground.game_map.$canvas.mousedown(function (e) {
             const rect = outer.ctx.canvas.getBoundingClientRect();  // 画布左上角相对于浏览器（0,0）的位置
-            let tx = e.clientX - rect.left, ty = e.clientY - rect.top;
+            let tx = (e.clientX - rect.left) / outer.playground.scale, ty = (e.clientY - rect.top) / outer.playground.scale;
             if(e.which === 3){  // 鼠标右键为3
                 outer.move_to(tx, ty);
             } else if(e.which === 1) {  // 鼠标左键为1
@@ -67,13 +67,13 @@ class Player extends AcGameObject {
 
     shoot_fireball(tx, ty) {
         let x = this.x, y = this.y;
-        let radius = this.playground.height * 0.01;
+        let radius = 0.01;
         let angle = Math.atan2(ty - this.y, tx - this.x);
         let vx = Math.cos(angle), vy = Math.sin(angle);
         let color = "orange";
-        let speed = this.playground.height * 0.5;
-        let move_length = this.playground.height * 1;
-        new FireBall(this.playground, this, x, y, radius, vx, vy, color, speed, move_length, this.playground.height * 0.01);
+        let speed = 0.5;
+        let move_length = 1;
+        new FireBall(this.playground, this, x, y, radius, vx, vy, color, speed, move_length, 0.01);
     }
 
     get_dist(x1, y1, x2,y2) {
@@ -103,7 +103,7 @@ class Player extends AcGameObject {
         }
 
         this.radius -= damage;
-        if (this.radius < 10) {  // 血量值为半径，半径小于10px认为死亡
+        if (this.radius < this.eps) {  // 血量值为半径，半径小于0.01*height认为死亡
             this.destroy();
             return false;
         }
@@ -114,14 +114,19 @@ class Player extends AcGameObject {
     }
 
     update(){
-        this.spent_time += this.timedelta / 1000;
+        this.update_move();
+        this.render();
+    }
+
+    update_move() {  // 更新移动
+       this.spent_time += this.timedelta / 1000;
         if (!this.is_me && this.spent_time > 4 && Math.random() < 1 / 300.0) {  // ai球每5s释放炮弹,前4秒不射
             let player = this.playground.players[Math.floor(Math.random() * this.playground.players.length)];  // 单人模式下，ai朝其他ai和玩家射
             let tx = player.x + player.vx * player.speed * this.timedelta / 1000;
             let ty = player.y + player.vy * player.speed * this.timedelta / 1000;  // AI预判
             this.shoot_fireball(player.x, player.y);
         }
-        if (this.damage_speed > 10) {
+        if (this.damage_speed > this.eps) {
             this.vx = this.vy = 0;
             this.move_length = 0;
             this.x += this.damage_x * this.damage_speed * this.timedelta / 1000;
@@ -132,8 +137,8 @@ class Player extends AcGameObject {
                 this.move_length = 0;
                 this.vx = this.vy = 0;
                 if (!this.is_me) {  // ai随机移动
-                    let tx = Math.random() * this.playground.width;
-                    let ty = Math.random() * this.playground.height;
+                    let tx = Math.random() * this.playground.width / this.playground.scale;
+                    let ty = Math.random() * this.playground.height / this.playground.scale;
                     this.move_to(tx, ty);
                 }
             } else {
@@ -145,21 +150,21 @@ class Player extends AcGameObject {
 
             }
         }
-        this.render();
     }
 
     render(){
+        let scale = this.playground.scale;  // 渲染时需要用绝对大小，需要乘上scale
         if (this.is_me) {  // 画头像
             this.ctx.save();
             this.ctx.beginPath();
-            this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+            this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI * 2, false);
             this.ctx.stroke();
             this.ctx.clip();
-            this.ctx.drawImage(this.img, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+            this.ctx.drawImage(this.img, (this.x - this.radius) * scale, (this.y - this.radius) * scale, this.radius * 2 * scale, this.radius * 2 * scale);
             this.ctx.restore();
         } else {  // 敌人纯色
             this.ctx.beginPath();
-            this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI *2, false);
+            this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI *2, false);
             this.ctx.fillStyle = this.color;
             this.ctx.fill();
         }

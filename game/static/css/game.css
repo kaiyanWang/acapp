@@ -32,10 +32,6 @@
     height: 7vh;
 }
 
-.ac-game-settings-github {
-    display: block;
-    height: 7vh;
-}
 
 .ac-game-settings-item {
     width: 100%;
@@ -89,20 +85,57 @@
     margin-bottom: 2vh;
 }
 
-.ac-game-settings-github > img {
-    position: relative;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    cursor: pointer;
+
+.ac-game-settings-third-party {
+    display: flex;          /* 弹性布局，子元素同行 */
+    justify-content: center;/* 水平居中 */
+    align-items: center;    /* 垂直居中 */
+    padding: 1vh 0;         /* 上下内边距，避免贴边 */
 }
 
+.ac-game-settings-github {
+    display: flex;          /* 内部图标+文字垂直排列 */
+    flex-direction: column; /* 列布局：图标在上，文字在下 */
+    align-items: center;    /* 水平居中 */
+    width: 12vw;            /* 固定宽度，保证对齐 */
+}
+.ac-game-settings-github > img {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 0.5vh;   /* 图标和文字间距 */
+    transition: all 0.2s ease;
+    cursor: pointer;        /* 整个区域可点击 */
+}
+.ac-game-settings-github > img:hover {
+    transform: scale(1.1);  /* 悬浮放大 */
+}
 .ac-game-settings-github > div {
     font-size: 1.5vh;
     color: white;
     text-align: center;
-    display: block;
-    padding-top: 1.5vh;
+}
+
+/* 微信登录样式（和 GitHub 完全对齐） */
+.ac-game-settings-wechat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 12vw;            /* 和 GitHub 同宽度，视觉对称 */
+}
+.ac-game-settings-wechat > img {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 0.5vh;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.ac-game-settings-wechat > img:hover {
+    transform: scale(1.1);
+}
+.ac-game-settings-wechat > div {
+    font-size: 1.5vh;
+    color: white;
+    text-align: center;
 }
 
 
@@ -155,5 +188,12 @@
     width: 100%;
     height: 100%;
     user-select: none;
+    background-color: grey;
 }
 
+.ac-game-playground > canvas {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

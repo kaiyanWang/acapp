@@ -15,6 +15,13 @@ class GameMap extends AcGameObject {
         
     }
 
+    resize() {  // 动态修改长宽
+        this.ctx.canvas.width = this.playground.width;
+        this.ctx.canvas.height = this.playground.height;
+        this.ctx.canvas.width = this.playground.width;
+        this.ctx.canvas.height = this.playground.height;
+    }
+
     update() {
         this.render();
     }

@@ -25,18 +25,23 @@ class Settings {
                 <button>登录</button>
             </div>
         </div>
-        <div class="ac-game-settings-error-message">
-        </div>
+        <div class="ac-game-settings-error-message"></div>
         <div class="ac-game-settings-option">
             注册
         </div>
         <br>
-        <div class="ac-game-settings-github">
-             <img width="30" src="http://39.99.43.230:8000/static/image/settings/github_logo.png">
-             <div>github一键登录</div>
-        </div>
-    </div>
 
+		<div class="ac-game-settings-third-party">
+			<div class="ac-game-settings-github">
+				<img width="30" src="http://39.99.43.230:8000/static/image/settings/github_logo.png">
+				<div>github一键登录</div>
+			</div>
+			<div class="ac-game-settings-wechat">
+				<img width="30" src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/svg/logo-wechat.svg">
+				<div>微信一键登录</div>
+			</div>
+		</div>
+</div>
 
     <div class="ac-game-settings-register">
         <div class="ac-game-settings-title">注册</div>
@@ -60,21 +65,23 @@ class Settings {
                 <button>注册</button>
             </div>
         </div>
-        <div class="ac-game-settings-error-message">
-        </div>
+        <div class="ac-game-settings-error-message"></div>
         <div class="ac-game-settings-option">
             登录
         </div>
         <br>
-        <div class="ac-game-settings-github">
-             <img width="30" src="http://39.99.43.230:8000/static/image/settings/github_logo.png">
-             <div>github一键登录</div>
+        <div class="ac-game-settings-third-party">
+            <div class="ac-game-settings-github">
+                <img width="30" src="http://39.99.43.230:8000/static/image/settings/github_logo.png">
+                <div>github一键登录</div>
+            </div>
+            <div class="ac-game-settings-wechat">
+                <img width="30" src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/svg/logo-wechat.svg">
+                <div>微信一键登录</div>
+            </div>
         </div>
+
     </div>
-
-
- 
-</div>
             `);
 
         this.$login = this.$settings.find(".ac-game-settings-login");
@@ -97,6 +104,7 @@ class Settings {
         this.$register.hide();
 
         this.$github_login = this.$settings.find('.ac-game-settings-github img');
+		this.$wechat_login = this.$settings.find('.ac-game-settings-wechat img');
 
         this.root.$ac_game.append(this.$settings);
 
@@ -149,7 +157,10 @@ class Settings {
         
         this.$github_login.click(function() {
             outer.github_login();
-        })
+        });
+        this.$wechat_login.click(function() {
+            outer.wechat_login();
+        });
     }
 
     add_listening_events_login() {
@@ -180,11 +191,18 @@ class Settings {
             data: {
             },
             success(resp) {
-                console.log(resp);
                 if (resp.result === "success") {
-                    console.log(resp);
                     window.location.replace(resp.apply_code_url);
                 }
+            }
+        });
+    }
+
+    wechat_login() {
+        $.ajax({
+            url: "",
+            type: "get",
+            success(resp) {
             }
         });
     }
