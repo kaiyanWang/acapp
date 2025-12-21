@@ -1,5 +1,6 @@
 class Player extends AcGameObject {
-    constructor(playground, x, y, radius, color, speed, is_me) {  // speed表示每秒移动height的百分比
+    constructor(playground, x, y, radius, color, speed, character, username, photo) {  // speed表示每秒移动height的百分比
+        console.log(character, username, photo);
         super();
         this.playground = playground;
         this.ctx = this.playground.game_map.ctx;
@@ -14,22 +15,24 @@ class Player extends AcGameObject {
         this.radius = radius;
         this.color = color;
         this.speed = speed;
-        this.is_me = is_me;
+        this.character = character;
+        this.username = username;
+        this.photo = photo;
         this.eps = 0.01;
         this.friction = 0.9;
         this.spent_time = 0;
 
         this.cur_skill = null;
 
-        // 画头像
-        if (this.is_me) {
+        // 画头像，只有是机器人才不画头像
+        if (this.character !== "robot") {
             this.img = new Image();
-            this.img.src = this.playground.root.settings.photo;
+            this.img.src = this.photo;
         }
     }
 
     start(){
-        if(this.is_me){
+        if(this.character === "me"){
             this.add_listening_events();
         } else {
             let tx = Math.random() * this.playground.width / this.playground.scale;
@@ -120,7 +123,7 @@ class Player extends AcGameObject {
 
     update_move() {  // 更新移动
        this.spent_time += this.timedelta / 1000;
-        if (!this.is_me && this.spent_time > 4 && Math.random() < 1 / 300.0) {  // ai球每5s释放炮弹,前4秒不射
+        if (this.character === "robot" && this.spent_time > 4 && Math.random() < 1 / 300.0) {  // ai球每5s释放炮弹,前4秒不射
             let player = this.playground.players[Math.floor(Math.random() * this.playground.players.length)];  // 单人模式下，ai朝其他ai和玩家射
             let tx = player.x + player.vx * player.speed * this.timedelta / 1000;
             let ty = player.y + player.vy * player.speed * this.timedelta / 1000;  // AI预判
@@ -136,7 +139,7 @@ class Player extends AcGameObject {
             if (this.move_length < this.eps) {
                 this.move_length = 0;
                 this.vx = this.vy = 0;
-                if (!this.is_me) {  // ai随机移动
+                if (this.character === "robot") {  // ai随机移动
                     let tx = Math.random() * this.playground.width / this.playground.scale;
                     let ty = Math.random() * this.playground.height / this.playground.scale;
                     this.move_to(tx, ty);
@@ -154,7 +157,7 @@ class Player extends AcGameObject {
 
     render(){
         let scale = this.playground.scale;  // 渲染时需要用绝对大小，需要乘上scale
-        if (this.is_me) {  // 画头像
+        if (this.character !== "robot") {  // 画头像
             this.ctx.save();
             this.ctx.beginPath();
             this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI * 2, false);
@@ -162,7 +165,7 @@ class Player extends AcGameObject {
             this.ctx.clip();
             this.ctx.drawImage(this.img, (this.x - this.radius) * scale, (this.y - this.radius) * scale, this.radius * 2 * scale, this.radius * 2 * scale);
             this.ctx.restore();
-        } else {  // 敌人纯色
+        } else {  // 机器人纯色
             this.ctx.beginPath();
             this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI *2, false);
             this.ctx.fillStyle = this.color;
