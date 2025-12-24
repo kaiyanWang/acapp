@@ -257,8 +257,6 @@ class Settings {
                 password_confirm: password_confirm,
             },
             success(resp) {
-                console.log(resp);
-                console.log(username, password, password_confirm);
                 if (resp.result === "success") {
                     location.reload();
                 } else {

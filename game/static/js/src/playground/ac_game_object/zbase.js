@@ -7,8 +7,6 @@ class AcGameObject {
         this.has_called_start = false;  // 是否执行过start函数
         this.timedelta = 0;  // 帧间间隔，timedelta 负责 “让游戏逻辑的速度不随流畅度变化”，核心是把 “按帧计算” 改成 “按时间计算”
         this.uuid = this.create_uuid();
-
-        console.log(this.uuid);
     }
 
     create_uuid() {
