@@ -46,6 +46,9 @@ class AcGamePlayground {
         this.game_map = new GameMap(this);
 
         this.mode = mode;
+        this.state = "waiting";  // 初始为waiting，满3人之后状态变为fighting，死亡之后变成over
+        this.notice_board = new NoticeBoard(this);
+        this.player_count = 0;
 
         this.resize();
 
